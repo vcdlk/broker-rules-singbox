@@ -1,0 +1,8 @@
+Broker.list
+broker.json
+broker.srs
+sing-box.tgz
+sing-box-*-linux-*/
+__pycache__/
+*.pyc
+.DS_Store

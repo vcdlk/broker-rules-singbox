@@ -1,0 +1,95 @@
+name: Build sing-box rule-set
+
+on:
+  schedule:
+    # daily at 17:23 UTC (≈ 01:23 Beijing) — off-peak minute on purpose
+    - cron: "23 17 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - convert.py
+      - .github/workflows/build.yml
+
+permissions:
+  contents: write
+
+env:
+  SOURCE_URL: https://raw.githubusercontent.com/Arthur-vx/broker-rules/main/Broker.list
+  SING_BOX_VERSION: "1.10.7"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download Broker.list
+        run: |
+          curl -fsSL "$SOURCE_URL" -o Broker.list
+          wc -l Broker.list
+
+      - name: Convert to sing-box JSON
+        run: python3 convert.py -i Broker.list -o broker.json
+
+      - name: Install sing-box CLI
+        run: |
+          ARCH=amd64
+          PKG="sing-box-${SING_BOX_VERSION}-linux-${ARCH}"
+          curl -fsSL -o sing-box.tgz \
+            "https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/${PKG}.tar.gz"
+          tar -xzf sing-box.tgz
+          sudo mv "${PKG}/sing-box" /usr/local/bin/
+          sing-box version
+
+      - name: Compile .srs
+        run: sing-box rule-set compile --output broker.srs broker.json
+
+      - name: Hash check (skip release if unchanged)
+        id: hash
+        run: |
+          NEW=$(sha256sum broker.srs | awk '{print $1}')
+          echo "sha=$NEW" >> "$GITHUB_OUTPUT"
+          PREV=""
+          if gh release view latest --json body -q .body > /tmp/prev.txt 2>/dev/null; then
+            PREV=$(grep -oE 'srs-sha256:[a-f0-9]+' /tmp/prev.txt | head -n1 | cut -d: -f2 || true)
+          fi
+          if [ -n "$PREV" ] && [ "$PREV" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "no change vs previous release; will skip publishing"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish release
+        if: steps.hash.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(TZ=Asia/Shanghai printf '%(%Y%m%d)T\n' -1)
+          TAG="v${DATE}"
+          BODY=$(cat <<EOF
+          Auto-built sing-box rule-set from Arthur-vx/broker-rules.
+
+          Source: ${SOURCE_URL}
+          srs-sha256:${{ steps.hash.outputs.sha }}
+          EOF
+          )
+          # update floating "latest" tag/release
+          gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create latest broker.json broker.srs \
+            --title "latest" \
+            --notes "$BODY"
+          # also tag a dated release for history (idempotent: skip if tag exists)
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" broker.json broker.srs \
+              --title "$TAG" \
+              --notes "$BODY"
+          fi
