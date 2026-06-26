@@ -11,8 +11,6 @@
 - JSON（源格式）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.json`
 - SRS（编译后）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs`
 
-`latest` 适合长期订阅；`v20260625` 这类按日期 tag 只用于锁定历史版本。
-
 ## sing-box 配置示例
 
 ```json
@@ -34,8 +32,6 @@
   }
 }
 ```
-
-`format: "source"` + `broker.json` 也可以，性能略低于 `binary`。
 
 ## 构建逻辑
 
