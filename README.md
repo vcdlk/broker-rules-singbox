@@ -11,7 +11,14 @@
 - JSON（源格式）：`https://github.com/<your-name>/<this-repo>/releases/download/latest/broker.json`
 - SRS（编译后）：`https://github.com/<your-name>/<this-repo>/releases/download/latest/broker.srs`
 
-把 `<your-name>/<this-repo>` 换成你 fork/创建后的实际仓库路径。也可以用按日期的 tag（如 `v20260625`）锁定具体某次构建。
+把 `<your-name>/<this-repo>` 换成你 fork/创建后的实际仓库路径。
+
+以当前仓库为例，固定订阅链接就是：
+
+- JSON（源格式）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.json`
+- SRS（编译后）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs`
+
+不要从某次 release 资产页直接复制 `v20260625` 这种按日期的链接；那是历史归档地址，会变化，不适合给用户长期订阅。按日期的 tag 只用于锁定某个具体版本。
 
 ## sing-box 配置示例
 
