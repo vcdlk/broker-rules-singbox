@@ -6,17 +6,12 @@
 
 ## 订阅地址
 
-固定指向最新一次构建（`latest` release）：
+固定链接：
 
 - JSON（源格式）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.json`
 - SRS（编译后）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs`
 
-以当前仓库为例，固定订阅链接就是：
-
-- JSON（源格式）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.json`
-- SRS（编译后）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs`
-
-不要从某次 release 资产页直接复制 `v20260625` 这种按日期的链接；那是历史归档地址，会变化，不适合给用户长期订阅。按日期的 tag 只用于锁定某个具体版本。
+`latest` 适合长期订阅；`v20260625` 这类按日期 tag 只用于锁定历史版本。
 
 ## sing-box 配置示例
 
@@ -44,13 +39,7 @@
 
 ## 构建逻辑
 
-`.github/workflows/build.yml`：
-
-1. 每天 17:23 UTC（约北京 01:23）跑一次，也支持手动触发
-2. 拉取 `Broker.list` → `convert.py` 解析 `IP-CIDR` / `DOMAIN` / `DOMAIN-SUFFIX` → 生成 `broker.json`
-3. 下载官方 sing-box CLI → `sing-box rule-set compile` 生成 `broker.srs`
-4. 比对 sha256，与上次 release 一致就跳过发布
-5. 否则更新 `latest` 这个浮动 release，并打一个按日期的 tag（如 `v20260625`）做历史归档
+GitHub Actions 每天自动抓取上游 `Broker.list`，生成 `broker.json` 和 `broker.srs`。内容有变化时更新 `latest` release，同时保留一个按日期命名的历史 tag。
 
 ## 本地构建
 
