@@ -8,10 +8,8 @@
 
 固定指向最新一次构建（`latest` release）：
 
-- JSON（源格式）：`https://github.com/<your-name>/<this-repo>/releases/download/latest/broker.json`
-- SRS（编译后）：`https://github.com/<your-name>/<this-repo>/releases/download/latest/broker.srs`
-
-把 `<your-name>/<this-repo>` 换成你 fork/创建后的实际仓库路径。
+- JSON（源格式）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.json`
+- SRS（编译后）：`https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs`
 
 以当前仓库为例，固定订阅链接就是：
 
@@ -30,7 +28,7 @@
         "tag": "broker",
         "type": "remote",
         "format": "binary",
-        "url": "https://github.com/<your-name>/<this-repo>/releases/download/latest/broker.srs",
+        "url": "https://github.com/vcdlk/broker-rules-singbox/releases/download/latest/broker.srs",
         "download_detour": "direct",
         "update_interval": "24h"
       }
